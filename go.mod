@@ -1,4 +1,4 @@
-module ws
+module github.com/qingfenghuohu/ws
 
 go 1.12
 
