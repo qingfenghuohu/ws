@@ -42,7 +42,7 @@ func (h *Hup) SetUpGrader(Ug Upgrader) {
 	h.UpGrader = Ug
 }
 
-func (h *Hup) WsHandler(Id string, c *gin.Context, callback func(conn *Conn, params ...interface{})) {
+func (h *Hup) WsHandler(Id string, c *gin.Context, callback func(conn *Conn, Id string, num int)) {
 	ws, err := h.UpGrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		fmt.Println(err.Error())
