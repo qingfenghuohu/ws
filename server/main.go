@@ -55,7 +55,7 @@ func (h *Hup) WsHandler(Id string, c *gin.Context, callback func(conn *Conn, par
 	}
 	h.WsList[Id][markNum] = ws
 	go func() {
-		callback(ws, Id, markNum, h)
+		callback(ws, Id, markNum)
 	}()
 	defer func() {
 		h.Close(ws, Id, markNum)
