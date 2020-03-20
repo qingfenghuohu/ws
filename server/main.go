@@ -42,7 +42,7 @@ func (h *Hup) SetUpGrader(Ug Upgrader) {
 	h.UpGrader = Ug
 }
 
-func (h *Hup) WsHandler(Id string, c *gin.Context) {
+func (h *Hup) WsHandler(Id string, c *gin.Context, callback func(conn *Conn, params ...interface{})) {
 	ws, err := h.UpGrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -54,6 +54,9 @@ func (h *Hup) WsHandler(Id string, c *gin.Context) {
 		h.WsList[Id] = map[int]*Conn{}
 	}
 	h.WsList[Id][markNum] = ws
+	go func() {
+		callback(ws, Id, markNum, h)
+	}()
 	defer func() {
 		fmt.Println("断开连接")
 		delete(h.WsList[Id], markNum)
@@ -66,21 +69,6 @@ func (h *Hup) WsHandler(Id string, c *gin.Context) {
 			//}
 		}
 	}()
-	//for {
-	//	mt, message, err := ws.ReadMessage()
-	//	if err != nil {
-	//		log.Println("read:", err)
-	//		break
-	//	}
-	//	log.Printf("recv: %s", message)
-	//	//h.Read[Id] <- Message{Id, mt, string(message)}
-	//	h.WriteMessage(Message{Id, mt, "hup:"+string(message)})
-	//	err = ws.WriteMessage(mt, message)
-	//	if err != nil {
-	//		log.Println("write:", err)
-	//		break
-	//	}
-	//}
 	h.ReadMessage(Id, ws)
 }
 
