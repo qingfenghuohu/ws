@@ -58,18 +58,18 @@ func (h *Hup) WsHandler(Id string, c *gin.Context, callback func(conn *Conn, par
 		callback(ws, Id, markNum, h)
 	}()
 	defer func() {
-		fmt.Println("断开连接")
-		delete(h.WsList[Id], markNum)
-		ws.Close()
-		if len(h.WsList[Id]) == 0 {
-			h.wsListMark[Id] = 0
-			delete(h.WsList, Id)
-			//if len(h.Read[Id]) > 0 {
-			//	close(h.Read[Id])
-			//}
-		}
+		h.Close(ws, Id, markNum)
 	}()
 	h.ReadMessage(Id, ws)
+}
+func (h *Hup) Close(conn *Conn, Id string, MarkNum int) {
+	fmt.Println("断开连接")
+	delete(h.WsList[Id], MarkNum)
+	conn.Close()
+	if len(h.WsList[Id]) == 0 {
+		h.wsListMark[Id] = 0
+		delete(h.WsList, Id)
+	}
 }
 
 func (h *Hup) WriteMessage(Mess Message) {
