@@ -42,7 +42,7 @@ func (h *Hup) SetUpGrader(Ug Upgrader) {
 	h.UpGrader = Ug
 }
 
-func (h *Hup) WsHandler(Id string, c *gin.Context, callback func(conn *Conn, Id string, num int)) {
+func (h *Hup) WsHandler(Id string, c *gin.Context, callback func(conn *Conn, Id string, num int), ReadMessage func(Id string, c *Conn, h *Hup)) {
 	ws, err := h.UpGrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -60,7 +60,7 @@ func (h *Hup) WsHandler(Id string, c *gin.Context, callback func(conn *Conn, Id 
 	defer func() {
 		h.Close(ws, Id, markNum)
 	}()
-	h.ReadMessage(Id, ws)
+	h.ReadMessage(Id, ws, ReadMessage)
 }
 func (h *Hup) Close(conn *Conn, Id string, MarkNum int) {
 	fmt.Println("断开连接")
@@ -83,24 +83,8 @@ func (h *Hup) WriteMessage(Mess Message) {
 	}
 }
 
-func (h *Hup) ReadMessage(Id string, c *Conn) {
-	if len(h.Read[Id]) == 0 {
-		h.Read[Id] = make(chan Message)
-	}
+func (h *Hup) ReadMessage(Id string, c *Conn, callback func(Id string, c *Conn, h *Hup)) {
 	for {
-		//读取ws中的数据
-		mt, message, err := c.ReadMessage()
-
-		if err != nil {
-			break
-		}
-		if string(message) != "" {
-			h.WriteMessage(Message{Id, mt, string(message)})
-			go func() {
-				h.Read[Id] <- Message{Id, mt, string(message)}
-			}()
-		}
-		fmt.Printf("RESPONSE: %s\n", message)
-
+		callback(Id, c, h)
 	}
 }
