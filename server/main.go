@@ -83,6 +83,17 @@ func (h *Hup) WriteMessage(Mess Message) {
 	}
 }
 
+func (h *Hup) AllWriteMessage(t int, content []byte) {
+	for _, vv := range h.WsList {
+		for _, v := range vv {
+			err := v.WriteMessage(t, content)
+			if err != nil {
+				fmt.Println(err)
+			}
+		}
+	}
+}
+
 func (h *Hup) ReadMessage(Id string, c *Conn, callback func(Id string, c *Conn, h *Hup)) {
 	for {
 		callback(Id, c, h)
