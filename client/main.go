@@ -6,26 +6,18 @@ import (
 )
 
 type Hup struct {
-	Url  string
-	Func func(mt int, message string)
-	Ws   *websocket.Conn
+	Url string
+	Ws  *websocket.Conn
 }
 
-func (c *Hup) WsClient() {
+func (c *Hup) WsClient(callback func(ws *websocket.Conn)) {
 	ws, _, err := websocket.DefaultDialer.Dial(c.Url, nil)
 	c.Ws = ws
 	if err != nil {
 		log.Fatal("WsClient:", err)
 	}
 	for {
-		//读取ws中的数据
-		mt, message, err := ws.ReadMessage()
-		if err != nil {
-			break
-		}
-		if string(message) != "" {
-			c.Func(mt, string(message))
-		}
+		callback(ws)
 	}
 }
 func (c *Hup) WriteMessage(Mt int, Mess string) {
